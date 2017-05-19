@@ -1,0 +1,3 @@
+jQuery.widget('dormilich.request', {
+    //
+});
