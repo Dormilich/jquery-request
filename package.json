@@ -1,0 +1,21 @@
+{
+  "name": "jquery-request",
+  "version": "0.1.0",
+  "description": "Fire AJAX requests off DOM element based configuration",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dormilich/jquery-request.git"
+  },
+  "keywords": [
+    "jquery",
+    "widget",
+    "plugin",
+    "AJAX"
+  ],
+  "author": "Bertold von Dormilich",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Dormilich/jquery-request/issues"
+  },
+  "homepage": "https://github.com/Dormilich/jquery-request#readme"
+}
