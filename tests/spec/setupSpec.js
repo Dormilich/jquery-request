@@ -12,7 +12,7 @@ describe( 'jQuery Request', function () {
     });
 
     it( 'should read the AJAX url from explicit configuration', function () {
-        var $button = $( '#button-1' );
+        var $button = $( '<button>click</button>' );
         var testUrl = 'http://example.com/api?key=' + Math.random();
         $button.request({
             url: testUrl
@@ -28,5 +28,16 @@ describe( 'jQuery Request', function () {
         $button.request();
 
         expect( $button.request( 'option', 'url' ) ).toBe( testUrl );
+    });
+
+    it( 'should overwrite explicit settings with data-* settings', function () {
+        var $button = $( '#button-1' );
+        var dataUrl = $button.data( 'url' );
+        var testUrl = 'http://example.com/api?key=' + Math.random();
+        $button.request({
+            url: testUrl
+        });
+
+        expect( $button.request( 'option', 'url' ) ).toBe( dataUrl );
     });
 });
