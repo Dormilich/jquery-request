@@ -36,4 +36,31 @@ describe( 'jQuery Request', function () {
 
         expect( $button.request( 'option', 'url' ) ).toBe( dataUrl );
     });
+
+    it( 'should have a default AJAX method', function () {
+        var $button = $( '<button>click</button>' );
+
+        $button.request();
+
+        expect( $button.request( 'option', 'method' ) ).toBe( 'GET' );
+    });
+
+    it( 'should read the AJAX method from explicit configuration', function () {
+        var $button = $( '<button>click</button>' );
+
+        $button.request({
+            method: 'POST'
+        });
+
+        expect( $button.request( 'option', 'method' ) ).toBe( 'POST' );
+    });
+
+    it( 'should read the AJAX method from data-* configuration', function () {
+        var $button = $( '<button data-method="HEAD">click</button>' );
+        var testUrl = $button.data( 'method' );
+
+        $button.request();
+
+        expect( $button.request( 'option', 'method' ) ).toBe( 'HEAD' );
+    });
 });
