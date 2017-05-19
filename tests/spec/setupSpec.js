@@ -1,11 +1,7 @@
 describe( 'jQuery Request', function () {
 
-    beforeEach(function () {
-        jasmine.getFixtures().load( 'button-1.html' );
-    });
-
     it( 'should return the jQuery object', function () {
-        var $button = $( '#button-1' );
+        var $button = $( '<button>click</button>' );
         var obj = $button.request();
 
         expect( obj ).toBe( $button );
@@ -22,7 +18,7 @@ describe( 'jQuery Request', function () {
     });
 
     it( 'should read the AJAX url from data-* configuration', function () {
-        var $button = $( '#button-1' );
+        var $button = $( '<button data-url="/test">click</button>' );
         var testUrl = $button.data( 'url' );
 
         $button.request();
@@ -31,7 +27,7 @@ describe( 'jQuery Request', function () {
     });
 
     it( 'should overwrite explicit settings with data-* settings', function () {
-        var $button = $( '#button-1' );
+        var $button = $( '<button data-url="/test">click</button>' );
         var dataUrl = $button.data( 'url' );
         var testUrl = 'http://example.com/api?key=' + Math.random();
         $button.request({
