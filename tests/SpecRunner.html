@@ -20,9 +20,16 @@
         path = 'http://code.jquery.com/jquery-' + jqversion[1] + '.min.js';
     }
     document.write('<script src="' + path + '"></'+'script>');
-}());
+})();
+(function() {
+    var path = '../src/jquery-ui-widget-1.12.1.min.js';
+    var jquiversion = location.search.match(/[?&]jquery-ui=(.*?)(?=&|$)/);
+    if (jquiversion) {
+        path = 'http://code.jquery.com/jquery-' + jquiversion[1] + '.min.js';
+    }
+    document.write('<script src="' + path + '"></'+'script>');
+})();
     </script>
-    <script src="../src/jquery-ui-widget-1.12.1.min.js"></script>
     <script src="../src/jquery-request.js"></script>
     <!-- include spec files here... -->
     <script src="spec/setupSpec.js"></script>
