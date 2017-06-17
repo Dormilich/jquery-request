@@ -9,7 +9,13 @@ $.widget( 'dormilich.request', {
     },
 
     _create: function () {
-        this._setOptions( this.element.data() );
+        var key, data = this.element.data();
+
+        for ( key in data ) {
+            if ( key in this.options ) {
+                this._setOption( key, data[ key ] );
+            }
+        }
     },
 
     _init: function () {
