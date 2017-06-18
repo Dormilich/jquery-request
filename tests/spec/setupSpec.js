@@ -102,13 +102,11 @@ describe( 'jQuery Request', function () {
         } );
 
         it( 'should emit a submit event before the AJAX request', function () {
-            var $button = $( '#button-1' ).request();
-
             jasmine.spyOnEvent( '#button-1', 'requestsubmit' );
 
             expect( 'requestsubmit' ).not.toHaveBeenTriggeredOn( '#button-1' );
 
-            $button.request( 'submit' );
+            $( '#button-1' ).request().request( 'submit' );
 
             expect( jasmine.Ajax.requests.mostRecent().url ).toBe( '/test?id=42' );
 
@@ -123,6 +121,201 @@ describe( 'jQuery Request', function () {
             });
 
             expect( 'requestsubmit' ).toHaveBeenTriggeredOn( '#button-1' );
+        } );
+
+        it( 'should return the jQuery AJAX object', function () {
+            var done = jasmine.createSpy( 'done' );
+
+            jasmine.Ajax.stubRequest( '/test?id=42' ).andReturn({
+                status: 200,
+                contentType: 'text/plain',
+                responseText: 'successful response'
+            });
+
+            $( '#button-1' )
+                .request()
+                .request( 'submit' )
+                .done( function ( data ) {
+                    done( data );
+                } )
+            ;
+
+            expect( done ).toHaveBeenCalledWith( 'successful response' );
+        } );
+
+    } );
+
+    describe( 'response events', function () {
+
+        beforeEach( function () {
+            jasmine.getFixtures().load( 'button-1.html' );
+            jasmine.Ajax.install();
+        } );
+
+        afterEach( function () {
+            jasmine.Ajax.uninstall();
+        } );
+
+        it( 'should be emitted after the AJAX request succeeds', function () {
+            jasmine.spyOnEvent( '#button-1', 'requesterror' );
+            jasmine.spyOnEvent( '#button-1', 'requestsuccess' );
+            jasmine.spyOnEvent( '#button-1', 'requestcomplete' );
+
+            $( '#button-1' ).request().request( 'submit' );
+
+            expect( 'requestsuccess' ).not.toHaveBeenTriggeredOn( '#button-1' );
+
+            jasmine.Ajax.requests.mostRecent().respondWith({
+                status: 200,
+                contentType: 'text/plain',
+                responseText: 'successful response'
+            });
+
+            expect( 'requestsuccess' ).toHaveBeenTriggeredOn( '#button-1' );
+            expect( 'requesterror' ).not.toHaveBeenTriggeredOn( '#button-1' );
+            expect( 'requestcomplete' ).toHaveBeenTriggeredOn( '#button-1' );
+        } );
+
+        it( 'should be emitted after the AJAX request fails', function () {
+            jasmine.spyOnEvent( '#button-1', 'requesterror' );
+            jasmine.spyOnEvent( '#button-1', 'requestsuccess' );
+            jasmine.spyOnEvent( '#button-1', 'requestcomplete' );
+
+            $( '#button-1' ).request().request( 'submit' );
+
+            expect( 'requesterror' ).not.toHaveBeenTriggeredOn( '#button-1' );
+
+            jasmine.Ajax.requests.mostRecent().respondWith({
+                status: 400,
+                contentType: 'text/plain',
+                responseText: 'error message'
+            });
+
+            expect( 'requesterror' ).toHaveBeenTriggeredOn( '#button-1' );
+            expect( 'requestsuccess' ).not.toHaveBeenTriggeredOn( '#button-1' );
+            expect( 'requestcomplete' ).toHaveBeenTriggeredOn( '#button-1' );
+        } );
+
+    } );
+
+    describe( 'success event', function () {
+
+        beforeEach( function () {
+            jasmine.getFixtures().load( 'button-1.html' );
+            jasmine.Ajax.install();
+            jasmine.Ajax.stubRequest( '/test?id=42' ).andReturn({
+                status: 200,
+                contentType: 'text/plain',
+                responseText: 'successful response'
+            });
+        } );
+
+        afterEach( function () {
+            jasmine.Ajax.uninstall();
+        } );
+
+        it( 'should receive the response data in the event handler', function () {
+            var evt = jasmine.createSpy( 'evt' );
+
+            $( '#button-1' )
+                .on( 'requestsuccess', function ( event, data ) {
+                    evt( data )
+                } )
+                .request({
+                    autoSubmit: true
+                })
+            ;
+
+            expect( evt ).toHaveBeenCalledWith( 'successful response' );
+        } );
+
+        it( 'should receive the AJAX data in the done handler', function () {
+            var done = jasmine.createSpy( 'done' );
+
+            $( '#button-1' )
+                .request()
+                .request( 'submit' )
+                .done( function ( data, status, jqXHR ) {
+                    done( data );
+                } )
+            ;
+
+            expect( done ).toHaveBeenCalledWith( 'successful response' );
+        } );
+
+        it( 'should not call the fail handler', function () {
+            var fail = jasmine.createSpy( 'fail' );
+
+            $( '#button-1' )
+                .request()
+                .request( 'submit' )
+                .fail( function ( jqXHR, status, error ) {
+                    fail( jqXHR.responseText );
+                } )
+            ;
+
+            expect( fail ).not.toHaveBeenCalled();
+        } );
+
+    } );
+
+    describe( 'error event', function () {
+
+        beforeEach( function () {
+            jasmine.getFixtures().load( 'button-1.html' );
+            jasmine.Ajax.install();
+            jasmine.Ajax.stubRequest( '/test?id=42' ).andReturn({
+                status: 400,
+                contentType: 'text/plain',
+                responseText: 'error message'
+            });
+        } );
+
+        afterEach( function () {
+            jasmine.Ajax.uninstall();
+        } );
+
+        it( 'should receive the error message in the event handler', function () {
+            var evt  = jasmine.createSpy( 'evt' );
+
+            $( '#button-1' )
+                .on( 'requesterror', function ( event, error ) {
+                    evt( error )
+                } )
+                .request({
+                    autoSubmit: true
+                })
+            ;
+
+            expect( evt ).toHaveBeenCalledWith( 'error message' );
+        } );
+
+        it( 'should receive the AJAX object in the fail handler', function () {
+            var fail = jasmine.createSpy( 'fail' );
+
+            $( '#button-1' )
+                .request()
+                .request( 'submit' )
+                .fail( function ( jqXHR, status, error ) {
+                    fail( jqXHR.responseText );
+                } )
+            ;
+
+            expect( fail ).toHaveBeenCalledWith( 'error message' );
+        } );
+
+        it( 'should not call the done handler', function () {
+            var done = jasmine.createSpy( 'done' );
+
+            $( '#button-1' )
+                .request()
+                .request( 'submit' )
+                .done( function ( data, status, jqXHR ) {
+                    done( data );
+                } )
+            ;
+
+            expect( done ).not.toHaveBeenCalled();
         } );
 
     } );
