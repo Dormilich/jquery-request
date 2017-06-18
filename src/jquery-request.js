@@ -35,26 +35,38 @@ $.widget( 'dormilich.request', {
 
         return $.ajax( this.options.url, {
             method: this.options.method.toUpperCase(), // jQuery >= 1.9.0
-            data: this._data(),
+            data: this._formData(),
             beforeSend: function () {
                 plugin._trigger( 'submit' );
             }
+        } ).always( function () {
+            plugin._trigger( 'complete' );
+        } ).done( function ( data ) {
+            plugin._trigger( 'success', null, data );
+        } ).fail( function ( jqXHR, status, error ) {
+            plugin._trigger( 'error', null, jqXHR.responseText || error );
         } );
     },
 
-    _data: function () {
-        var data, plugin = this;
-        // unfortunately, `.dataset` is not supported by IE < 11
-        // otherwise I could spare me the widget removal
-        data = $.extend( {}, this.element.data() );
-        // filter off the widget options
+    _formData: function () {
+        var data = this._dataSet();
+
         $.each( this.options, function ( key ) {
             delete data[ key ];
         } );
+
+        return data;
+    },
+
+    _dataSet: function () {
+        var data = {}, plugin = this;
+        // `.dataset` is not supported by IE < 11
+        // additional data may have been set through jQuery or DOM
+        $.extend( data, this.element[ 0 ].dataset, this.element.data() );
         // remove the property that refers to the widget instance
         // since that interfers with events in jQuery.ajax()
-        // this differs between jQuery 2 (namespace-name)
-        // and jQuery 3 (namespaceName)
+        // this differs between jQuery 2 (dormilich-request)
+        // and jQuery 3 (dormilichRequest)
         $.each( data, function ( key ) {
             if ( key.indexOf( plugin.namespace ) === 0 ) {
                 delete data[ key ];
