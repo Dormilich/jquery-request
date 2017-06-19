@@ -320,4 +320,68 @@ describe( 'jQuery Request', function () {
 
     } );
 
+    describe( 'data parameter', function () {
+
+        beforeEach( function () {
+            jasmine.Ajax.install();
+            jasmine.Ajax.stubRequest( '/test' ).andReturn({
+                status: 204
+            });
+        } );
+
+        afterEach( function () {
+            jasmine.Ajax.uninstall();
+        } );
+
+        it( 'should pass only non-configurational data to AJAX', function () {
+            var data, html = '<i data-url="/test" data-method="post" data-auto-submit="false" data-id="42"></i>';
+
+            $(html).request().request( 'submit' );
+
+            data = jasmine.Ajax.requests.mostRecent().data();
+            expect( data ).toEqual( { id: [ '42' ] } );
+        } );
+
+        it( 'should pass composite keys as camelCase to AJAX', function () {
+            var data, html = '<i data-url="/test" data-method="post" data-foo-bar="value"></i>';
+
+            $(html).request().request( 'submit' );
+
+            data = jasmine.Ajax.requests.mostRecent().data();
+            expect( data ).toEqual( { fooBar: [ 'value' ] } );
+        } );
+
+        it( 'should add data passed in through jQuery', function () {
+            var data, html = '<i data-url="/test" data-method="post" data-id="42"></i>';
+
+            $(html).request().data('foo', 'bar').request( 'submit' );
+
+            data = jasmine.Ajax.requests.mostRecent().data();
+            expect( data ).toEqual( { id: [ '42' ], foo: [ 'bar' ] } );
+        } );
+
+        it( 'should add data passed in through DOM', function () {
+            var data, $elem, html = '<i data-url="/test" data-method="post" data-id="42"></i>';
+
+            $elem = $(html).request();
+            $elem[ 0 ].dataset.foo = 'bar';
+            $elem.request( 'submit' );
+
+            data = jasmine.Ajax.requests.mostRecent().data();
+            expect( data ).toEqual( { id: [ '42' ], foo: [ 'bar' ] } );
+        } );
+
+        it( 'should prefer jQuery over DOM', function () {
+            var data, $elem, html = '<i data-url="/test" data-method="post" data-id="42"></i>';
+
+            $elem = $(html).request().data('foo', 'x');
+            $elem[ 0 ].dataset.foo = 'y';
+            $elem.request( 'submit' );
+
+            data = jasmine.Ajax.requests.mostRecent().data();
+            expect( data ).toEqual( { id: [ '42' ], foo: [ 'x' ] } );
+        } );
+
+    } );
+
 } );
