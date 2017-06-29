@@ -336,7 +336,7 @@ describe( 'jQuery Request', function () {
         it( 'should pass only non-configurational data to AJAX', function () {
             var data, html = '<i data-url="/test" data-method="post" data-auto-submit="false" data-id="42"></i>';
 
-            $(html).request().request( 'submit' );
+            $( html ).request().request( 'submit' );
 
             data = jasmine.Ajax.requests.mostRecent().data();
             expect( data ).toEqual( { id: [ '42' ] } );
@@ -345,7 +345,7 @@ describe( 'jQuery Request', function () {
         it( 'should pass composite keys as camelCase to AJAX', function () {
             var data, html = '<i data-url="/test" data-method="post" data-foo-bar="value"></i>';
 
-            $(html).request().request( 'submit' );
+            $( html ).request().request( 'submit' );
 
             data = jasmine.Ajax.requests.mostRecent().data();
             expect( data ).toEqual( { fooBar: [ 'value' ] } );
@@ -354,7 +354,7 @@ describe( 'jQuery Request', function () {
         it( 'should add data passed in through jQuery', function () {
             var data, html = '<i data-url="/test" data-method="post" data-id="42"></i>';
 
-            $(html).request().data('foo', 'bar').request( 'submit' );
+            $( html ).request().data('foo', 'bar').request( 'submit' );
 
             data = jasmine.Ajax.requests.mostRecent().data();
             expect( data ).toEqual( { id: [ '42' ], foo: [ 'bar' ] } );
@@ -363,7 +363,7 @@ describe( 'jQuery Request', function () {
         it( 'should add data passed in through DOM', function () {
             var data, $elem, html = '<i data-url="/test" data-method="post" data-id="42"></i>';
 
-            $elem = $(html).request();
+            $elem = $( html ).request();
             $elem[ 0 ].dataset.foo = 'bar';
             $elem.request( 'submit' );
 
@@ -374,12 +374,92 @@ describe( 'jQuery Request', function () {
         it( 'should prefer jQuery over DOM', function () {
             var data, $elem, html = '<i data-url="/test" data-method="post" data-id="42"></i>';
 
-            $elem = $(html).request().data('foo', 'x');
+            $elem = $( html ).request().data('foo', 'x');
             $elem[ 0 ].dataset.foo = 'y';
             $elem.request( 'submit' );
 
             data = jasmine.Ajax.requests.mostRecent().data();
             expect( data ).toEqual( { id: [ '42' ], foo: [ 'x' ] } );
+        } );
+
+    } );
+
+    describe( 'icons', function() {
+
+        beforeEach( function () {
+            jasmine.Ajax.install();
+        } );
+
+        afterEach( function () {
+            jasmine.Ajax.uninstall();
+        } );
+
+        it( 'should be ignored if the default icon is not set', function () {
+            var $elem, html = '<i data-url="/test" class="fa fa-start"></i>';
+
+            $elem = $( html ).request().request( 'submit' );
+
+            expect( $elem[ 0 ].className ).toBe( 'fa fa-start' );
+
+            jasmine.Ajax.requests.mostRecent().respondWith({
+                status: 204
+            });
+
+            expect( $elem[ 0 ].className ).toBe( 'fa fa-start' );
+        } );
+
+        it( 'should set the pending icon while waiting for the response', function () {
+            var $elem, html = '<i data-url="/test" data-icon-default="fa-start" data-icon-pending="fa-wait" class="fa fa-start"></i>';
+
+            $elem = $( html ).request();
+            // don't change until started
+            expect( $elem[ 0 ].className ).toBe( 'fa fa-start' );
+
+            $elem.request( 'submit' );
+
+            expect( $elem[ 0 ].className ).toBe( 'fa fa-wait' );
+
+            jasmine.Ajax.requests.mostRecent().respondWith({
+                status: 204
+            });
+
+            expect( $elem[ 0 ].className ).toBe( 'fa fa-start' );
+        } );
+
+        it( 'should set the error icon when the request fails', function () {
+            var $elem, html = '<i data-url="/test" data-icon-default="fa-start" data-icon-error="fa-problem" class="fa fa-start"></i>';
+
+            $elem = $( html ).request().request( 'submit' );
+
+            expect( $elem[ 0 ].className ).toBe( 'fa fa-start' );
+
+            jasmine.Ajax.requests.mostRecent().respondWith({
+                status: 400
+            });
+
+            expect( $elem[ 0 ].className ).toBe( 'fa fa-problem' );
+        } );
+
+        it( 'should use default icons when using an icon class', function () {
+            var $elem, html = '<i data-url="/test" data-icon-class="fa" data-icon-default="start" class="fa fa-fw fa-start"></i>';
+
+            $elem = $( html ).request()
+                .request( 'options', 'icons.fa.pending', 'foo' )
+            ;
+
+            expect( $elem.hasClass( 'foo' ) ).toBe( false );
+
+            $elem.request( 'submit' );
+
+            expect( $elem.hasClass( 'fa-start' ) ).toBe( false );
+            expect( $elem.hasClass( 'foo' ) ).toBe( true );
+
+            jasmine.Ajax.requests.mostRecent().respondWith({
+                status: 204
+            });
+
+            expect( $elem.hasClass( 'fa-start' ) ).toBe( true );
+            expect( $elem.hasClass( 'foo' ) ).toBe( false );
         } );
 
     } );
