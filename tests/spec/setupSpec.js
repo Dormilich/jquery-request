@@ -397,7 +397,8 @@ describe( 'jQuery Request', function () {
         it( 'should be ignored if the default icon is not set', function () {
             var $elem, html = '<i data-url="/test" class="fa fa-start"></i>';
 
-            $elem = $( html ).request().request( 'submit' );
+            $elem = $( html ).request();
+            $elem.request( 'submit' );
 
             expect( $elem[ 0 ].className ).toBe( 'fa fa-start' );
 
@@ -429,7 +430,8 @@ describe( 'jQuery Request', function () {
         it( 'should set the error icon when the request fails', function () {
             var $elem, html = '<i data-url="/test" data-icon-default="fa-start" data-icon-error="fa-problem" class="fa fa-start"></i>';
 
-            $elem = $( html ).request().request( 'submit' );
+            $elem = $( html ).request();
+            $elem.request( 'submit' );
 
             expect( $elem[ 0 ].className ).toBe( 'fa fa-start' );
 
@@ -444,7 +446,7 @@ describe( 'jQuery Request', function () {
             var $elem, html = '<i data-url="/test" data-icon-class="fa" data-icon-default="start" class="fa fa-fw fa-start"></i>';
 
             $elem = $( html ).request()
-                .request( 'options', 'icons.fa.pending', 'foo' )
+                .request( 'option', 'icons.fa.pending', 'foo' )
             ;
 
             expect( $elem.hasClass( 'foo' ) ).toBe( false );

@@ -5,7 +5,10 @@ $.widget( 'dormilich.request', {
     options: {
         url: false,
         method: 'GET',
-        autoSubmit: false
+        autoSubmit: false,
+        iconDefault: false,
+        iconPending: false,
+        iconError: false
     },
 
     _create: function () {
@@ -38,13 +41,16 @@ $.widget( 'dormilich.request', {
             data: this._formData(),
             beforeSend: function () {
                 plugin._trigger( 'submit' );
+                plugin._setIcon( 'Pending' );
             }
         } ).always( function () {
             plugin._trigger( 'complete' );
         } ).done( function ( data ) {
             plugin._trigger( 'success', null, data );
+            plugin._setIcon( 'Default' );
         } ).fail( function ( jqXHR, status, error ) {
             plugin._trigger( 'error', null, jqXHR.responseText || error );
+            plugin._setIcon( 'Error' );
         } );
     },
 
@@ -74,6 +80,30 @@ $.widget( 'dormilich.request', {
         } );
 
         return data;
+    },
+
+    _setIcon: function ( type ) {
+        var opt = this.options, classes, icons, icon = opt[ 'icon' + type ];
+
+        if ( ! opt.iconDefault || ! icon ) {
+            return false;
+        }
+
+        icons = [ opt.iconDefault, opt.iconPending, opt.iconError ].filter( function ( str ) {
+            return !! str;
+        });
+
+        classes = icons.map( function ( cls ) {
+            return '.' + cls;
+        } ).join( ', ' );
+
+        this.element
+            .find( classes )
+            .addBack()
+            .filter( classes )
+            .removeClass( icons.join( ' ' ) )
+            .addClass( icon )
+        ;
     }
 
 } );
