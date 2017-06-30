@@ -143,6 +143,25 @@ describe( 'jQuery Request', function () {
             expect( done ).toHaveBeenCalledWith( 'successful response' );
         } );
 
+        it( 'should call the configured submit handler', function () {
+            var done = jasmine.createSpy( 'done' );
+
+            jasmine.Ajax.stubRequest( '/test?id=42' ).andReturn({
+                status: 200,
+                contentType: 'text/plain',
+                responseText: 'successful response'
+            });
+
+            $( '#button-1' )
+                .request({
+                    submit: done
+                })
+                .request( 'submit' )
+            ;
+
+            expect( done ).toHaveBeenCalled();
+        } );
+
     } );
 
     describe( 'response events', function () {
@@ -257,6 +276,19 @@ describe( 'jQuery Request', function () {
             expect( fail ).not.toHaveBeenCalled();
         } );
 
+        it( 'should call the configured success handler', function () {
+            var done = jasmine.createSpy( 'done' );
+
+            $( '#button-1' )
+                .request({
+                    success: done
+                })
+                .request( 'submit' )
+            ;
+
+            expect( done ).toHaveBeenCalled();
+        } );
+
     } );
 
     describe( 'error event', function () {
@@ -316,6 +348,19 @@ describe( 'jQuery Request', function () {
             ;
 
             expect( done ).not.toHaveBeenCalled();
+        } );
+
+        it( 'should call the configured error handler', function () {
+            var done = jasmine.createSpy( 'done' );
+
+            $( '#button-1' )
+                .request({
+                    error: done
+                })
+                .request( 'submit' )
+            ;
+
+            expect( done ).toHaveBeenCalled();
         } );
 
     } );
