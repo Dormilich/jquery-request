@@ -1,6 +1,6 @@
 $.widget( 'dormilich.request', {
 
-    version: '0.1.0',
+    version: '1.0.0',
 
     options: {
         url: false,
@@ -42,8 +42,13 @@ $.widget( 'dormilich.request', {
         }
     },
 
+    /**
+     * When using an icon class, use that to define the icons to be used. 
+     * @return void
+     */
     _initIcons: function () {
-        var opt = this.options, set = opt.icons[ opt.iconClass ];
+        var opt = this.options,
+            set = opt.icons[ opt.iconClass ];
 
         if ( ! ( opt.iconDefault && set ) ) {
             return false;
@@ -54,6 +59,12 @@ $.widget( 'dormilich.request', {
         opt.iconError   = this._transformIcon( opt.iconClass, set.error );
     },
 
+    /**
+     * Prepend-when necessary-the icon class to the configured icon. 
+     * @param (string) prefix Icon class value.
+     * @param (string) icon Icon value (this may hold multiple class names).
+     * @return string Icon prefixed with the icon class.
+     */
     _transformIcon: function ( prefix, icon ) {
         var re = new RegExp( '( |^)(' + prefix + '-){2,}', 'g' );
 
@@ -67,6 +78,11 @@ $.widget( 'dormilich.request', {
         ;
     },
 
+    /**
+     * Make the AJAX request. If some required configuration is missing, 
+     * return a rejected Deferred object.
+     * @return $.Deferred jqXHR or a rejected Deferred.
+     */
     submit: function () {
         var plugin = this;
 
@@ -96,6 +112,10 @@ $.widget( 'dormilich.request', {
         } );
     },
 
+    /**
+     * Strip configuration data from the AJAX data input.
+     * @return Object
+     */
     _formData: function () {
         var data = this._dataSet();
 
@@ -106,6 +126,11 @@ $.widget( 'dormilich.request', {
         return data;
     },
 
+    /**
+     * Read data from data attributes and jQuery's data store (excluding the 
+     * plugin instance).
+     * @return Object
+     */
     _dataSet: function () {
         var data = {}, plugin = this;
         // `.dataset` is not supported by IE < 11
@@ -124,8 +149,14 @@ $.widget( 'dormilich.request', {
         return data;
     },
 
+    /**
+     * Set the 'button' icons depending on the current AJAX state, 
+     * if configured appropriately.
+     * @param (string) type Icon type (Default, Pending, Error).
+     * @return void
+     */
     _setIcon: function ( type ) {
-        var classes, icons, 
+        var icons, classes, 
             opt = this.options, 
             icon = opt[ 'icon' + type ];
 
@@ -145,6 +176,10 @@ $.widget( 'dormilich.request', {
         ;
     },
 
+    /**
+     * Get the class names of the configured 'button' icons.
+     * @return Array
+     */
     _getIcons: function () {
         var opt = this.options;
         return [
@@ -160,6 +195,11 @@ $.widget( 'dormilich.request', {
         ;
     },
 
+    /**
+     * Get the CSS selector to find the element that holds the 'button' icons. 
+     * @param (Array) icons Class names from the icons.
+     * @return string CSS selector.
+     */
     _lookupIcon: function ( icons ) {
         if ( this.option.iconClass ) {
             return '.' + this.option.iconClass;
