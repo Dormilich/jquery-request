@@ -304,7 +304,7 @@ describe( 'jQuery Request', function () {
             expect( fail ).toHaveBeenCalledWith( 'error message' );
         } );
 
-        it( 'should not call the done handler', function () {
+        it( 'should not call the success handler', function () {
             var done = jasmine.createSpy( 'done' );
 
             $( '#button-1' )
@@ -442,7 +442,7 @@ describe( 'jQuery Request', function () {
             expect( $elem[ 0 ].className ).toBe( 'fa fa-problem' );
         } );
 
-        it( 'should use default icons when using an icon class', function () {
+        it( 'should use the default classes when using an icon class', function () {
             var $elem, html = '<i data-url="/test" data-icon-class="fa" data-icon-default="start" class="fa fa-fw fa-start"></i>';
 
             $elem = $( html ).request()
@@ -454,15 +454,28 @@ describe( 'jQuery Request', function () {
             $elem.request( 'submit' );
 
             expect( $elem.hasClass( 'fa-start' ) ).toBe( false );
-            expect( $elem.hasClass( 'foo' ) ).toBe( true );
+            expect( $elem.hasClass( 'fa-foo' ) ).toBe( true );
 
             jasmine.Ajax.requests.mostRecent().respondWith({
                 status: 204
             });
 
             expect( $elem.hasClass( 'fa-start' ) ).toBe( true );
-            expect( $elem.hasClass( 'foo' ) ).toBe( false );
+            expect( $elem.hasClass( 'fa-foo' ) ).toBe( false );
         } );
+
+        it( 'should not double the icon prefix, if it is used', function () {
+            var $elem, html = '<i data-url="/test" data-icon-class="fa" data-icon-default="fa-start" class="fa fa-fw fa-start"></i>';
+
+            $elem = $( html ).request();
+            $elem.request( 'submit' );
+
+            jasmine.Ajax.requests.mostRecent().respondWith({
+                status: 204
+            });
+
+            expect( $elem.hasClass( 'fa-start' ) ).toBe( true );
+        } )
 
     } );
 

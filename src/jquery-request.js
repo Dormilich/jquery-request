@@ -8,7 +8,22 @@ $.widget( 'dormilich.request', {
         autoSubmit: false,
         iconDefault: false,
         iconPending: false,
-        iconError: false
+        iconError: false,
+        iconClass: false,
+        icons: {
+            fa: {
+                pending: 'spinner pulse',
+                error: 'exclamation-triangle'
+            },
+            glyphicon: {
+                pending: 'hourglass',
+                error: 'alert'
+            },
+            "ui-icon": {
+                pending: 'clock',
+                error: 'alert'
+            }
+        }
     },
 
     _create: function () {
@@ -27,6 +42,31 @@ $.widget( 'dormilich.request', {
         }
     },
 
+    _initIcons: function () {
+        var opt = this.options, set = opt.icons[ opt.iconClass ];
+
+        if ( ! ( opt.iconDefault && set ) ) {
+            return false;
+        }
+
+        opt.iconDefault = this._transformIcon( opt.iconClass, opt.iconDefault );
+        opt.iconPending = this._transformIcon( opt.iconClass, set.pending );
+        opt.iconError   = this._transformIcon( opt.iconClass, set.error );
+    },
+
+    _transformIcon: function ( prefix, icon ) {
+        var re = new RegExp( '( |^)(' + prefix + '-){2,}', 'g' );
+
+        return icon
+            .split( ' ' )
+            .map( function ( item ) {
+                return prefix + '-' + item;
+            } )
+            .join( ' ' )
+            .replace( re, '$2' )
+        ;
+    },
+
     submit: function () {
         var plugin = this;
 
@@ -35,6 +75,8 @@ $.widget( 'dormilich.request', {
                 dfr.reject( 'Missing required AJAX URL.' );
             } );
         }
+
+        this._initIcons();
 
         return $.ajax( this.options.url, {
             method: this.options.method.toUpperCase(), // jQuery >= 1.9.0
@@ -83,19 +125,16 @@ $.widget( 'dormilich.request', {
     },
 
     _setIcon: function ( type ) {
-        var opt = this.options, classes, icons, icon = opt[ 'icon' + type ];
+        var classes, icons, 
+            opt = this.options, 
+            icon = opt[ 'icon' + type ];
 
-        if ( ! opt.iconDefault || ! icon ) {
+        if ( ! ( opt.iconDefault && icon ) ) {
             return false;
         }
 
-        icons = [ opt.iconDefault, opt.iconPending, opt.iconError ].filter( function ( str ) {
-            return !! str;
-        });
-
-        classes = icons.map( function ( cls ) {
-            return '.' + cls;
-        } ).join( ', ' );
+        icons = this._getIcons();
+        classes = this._lookupIcon( icons );
 
         this.element
             .find( classes )
@@ -103,6 +142,34 @@ $.widget( 'dormilich.request', {
             .filter( classes )
             .removeClass( icons.join( ' ' ) )
             .addClass( icon )
+        ;
+    },
+
+    _getIcons: function () {
+        var opt = this.options;
+        return [
+            opt.iconDefault,
+            opt.iconPending,
+            opt.iconError 
+        ]
+            .filter( function ( str ) {
+                return !! str;
+            } )
+            .join( ' ' )
+            .split( ' ' )
+        ;
+    },
+
+    _lookupIcon: function ( icons ) {
+        if ( this.option.iconClass ) {
+            return '.' + this.option.iconClass;
+        }
+
+        return icons
+            .map( function ( cls ) {
+                return '.' + cls;
+            } )
+            .join( ', ' )
         ;
     }
 
